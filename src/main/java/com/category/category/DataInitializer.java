@@ -11,22 +11,21 @@ import java.util.Set;
 public class DataInitializer {
 
     @Bean
-    CommandLineRunner initData(CategoryRepository categorieRepository, ProductRepository produitRepository) {
+    CommandLineRunner initData(
+            CategoryRepository categorieRepository,
+            ProductRepository produitRepository,
+            ShoppingCartRepository cartRepository
+    ) {
         return args -> {
-
             Category electronics = new Category();
             electronics.setName("Électronique");
             electronics.setDescription("Appareils électroniques");
-
-            Category clothing = new Category();
-            clothing.setName("Vêtements");
-            clothing.setDescription("Vêtements pour hommes et femmes");
 
             Category books = new Category();
             books.setName("Livres");
             books.setDescription("Tous les types de livres");
 
-            categorieRepository.saveAll(List.of(electronics, clothing, books));
+            categorieRepository.saveAll(List.of(electronics, books));
 
             Category phones = new Category();
             phones.setName("Téléphones");
@@ -34,52 +33,57 @@ public class DataInitializer {
             phones.setParent(electronics);
 
             Category laptops = new Category();
-            laptops.setName("Ordinateurs portables");
-            laptops.setDescription("PC et Macbooks");
+            laptops.setName("Ordinateurs");
+            laptops.setDescription("PC portables et fixes");
             laptops.setParent(electronics);
 
-            Category men = new Category();
-            men.setName("Hommes");
-            men.setDescription("Vêtements pour hommes");
-            men.setParent(clothing);
+            categorieRepository.saveAll(List.of(phones, laptops));
 
-            Category women = new Category();
-            women.setName("Femmes");
-            women.setDescription("Vêtements pour femmes");
-            women.setParent(clothing);
-
-            categorieRepository.saveAll(List.of(phones, laptops, men, women));
-
+            // -----------------------------
+            // Create Products
+            // -----------------------------
             Product iphone = new Product();
             iphone.setNom("iPhone 14");
             iphone.setPrice(999.99);
-            iphone.setQuantityStock(10);
+            iphone.setQuantityStock(20);
 
             Product macbook = new Product();
             macbook.setNom("MacBook Pro M2");
             macbook.setPrice(1999.99);
             macbook.setQuantityStock(5);
 
-            Product tshirt = new Product();
-            tshirt.setNom("T-Shirt coton");
-            tshirt.setPrice(19.99);
-            tshirt.setQuantityStock(50);
+            Product book = new Product();
+            book.setNom("Clean Code");
+            book.setPrice(42.0);
+            book.setQuantityStock(100);
 
-            Product novel = new Product();
-            novel.setNom("Nom");
-            novel.setPrice(12.49);
-            novel.setQuantityStock(30);
-
-            produitRepository.saveAll(List.of(iphone, macbook, tshirt, novel));
+            produitRepository.saveAll(List.of(iphone, macbook, book));
 
             phones.setProducts(Set.of(iphone));
             laptops.setProducts(Set.of(macbook));
-            men.setProducts(Set.of(tshirt));
-            books.setProducts(Set.of(novel));
+            books.setProducts(Set.of(book));
 
-            categorieRepository.saveAll(List.of(phones, laptops, men, books));
+            categorieRepository.saveAll(List.of(phones, laptops, books));
 
-            System.out.println("✅ Données de test insérées dans H2 !");
+            ShoppingCart cart = new ShoppingCart();
+            cart.setCustomerReference("client123");
+
+            CartItem item1 = new CartItem();
+            item1.setProduct(iphone);
+            item1.setQuantity(2);
+            item1.setCart(cart);
+
+            CartItem item2 = new CartItem();
+            item2.setProduct(book);
+            item2.setQuantity(1);
+            item2.setCart(cart);
+
+            cart.setItems(List.of(item1, item2));
+
+            cartRepository.save(cart);
+
+            System.out.println("✅ Données de test insérées avec succès !");
+            System.out.println("🛒 Panier total : " + cart.getTotal() + " €");
         };
     }
 }
